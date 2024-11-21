@@ -1,35 +1,21 @@
-// src/models/Recommendation.ts
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
-// TODO: Define the Mongoose schema and model for storing recommendations.
-
-// Hints:
-// - Define a schema that includes:
-//   - `userRef`: string
-//   - `suggestions`: string[]
-// - Create a TypeScript interface for type safety (without using the 'I' prefix).
-// - Export the Mongoose model to be used in other parts of your application.
-
-// Example (from a different application):
-
-/*
-import mongoose, { Document, Schema } from 'mongoose';
-
-// Define an interface for the document
-export interface ArticleDocument extends Document {
-  author: string;
-  content: string;
-  tags: string[];
+export interface Recommendation extends Document {
+  userRef: string;
+  suggestions: string[];
+  createdAt: Date;
 }
 
-// Create the schema
-const ArticleSchema: Schema = new Schema({
-  author: { type: String, required: true },
-  content: { type: String, required: true },
-  tags: { type: [String], required: true },
-});
+const RecommendationSchema: Schema<Recommendation> = new Schema(
+  {
+    userRef: { type: String, required: true },
+    suggestions: { type: [String], required: true },
+    createdAt: { type: Date, default: Date.now },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-// Export the model
-export const ArticleModel = mongoose.model<ArticleDocument>('Article', ArticleSchema);
-*/
-
-// Apply this pattern to create your `Recommendation` model.
+export const RecommendationModel: Model<Recommendation> =
+  mongoose.model<Recommendation>('Recommendation', RecommendationSchema);

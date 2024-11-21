@@ -29,3 +29,19 @@ export const initializeDatabase = async () => {
 
 // Note:
 // - Remember to call this initialization function before your application starts listening for requests.
+import mongoose from 'mongoose';
+
+const DATABASE_URI =
+// 'mongodb://localhost:27017/dev';
+  process.env.DATABASE_URI || 'mongodb://db:27017/dev';
+
+export const connectDB = async (): Promise<void> => {
+  try {
+    console.log(DATABASE_URI);
+    await mongoose.connect(DATABASE_URI);
+    console.log('Connected to the database');
+  } catch (error) {
+    console.error('Database connection error:', error);
+    process.exit(1);
+  }
+};

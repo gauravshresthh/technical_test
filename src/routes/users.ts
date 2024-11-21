@@ -1,8 +1,5 @@
-// src/routes/users.ts
-
 import { Router } from 'express';
-// import { getUserRecommendations } from '../controllers/usersController';
-
+import { getRecommendations } from '../controllers/users-controller';
 const router = Router();
 
 /**
@@ -17,10 +14,12 @@ const router = Router();
  * - No additional validation middleware is required unless you want to validate `userRef`.
  */
 
- // Example (from a different context):
+// Example (from a different context):
 
- /*
+/*
  router.get('/:userRef/suggestions', getUserRecommendations);
  */
+
+router.get('/:userRef/recommendations', getRecommendations);
 
 export default router;

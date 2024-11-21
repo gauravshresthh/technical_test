@@ -11,6 +11,8 @@ services:
     depends_on:
       - wiremock
       - db
+    env_file:
+      - .env
 
   wiremock:
     image: wiremock/wiremock:2.35.0
@@ -19,6 +21,12 @@ services:
     volumes:
       - ./wiremock:/home/wiremock
     command: --verbose
-
+  db:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
 volumes:
   mongo_data:

@@ -1,54 +1,63 @@
-// src/controllers/recommendationsController.ts
-
 import { Request, Response } from 'express';
-// import axios from 'axios';
-// import { OfferModel } from '../models/Offer';
+import axios from 'axios';
+import { RecommendationModel } from '../models/recommendation';
 
-export const generateOffers = async (req: Request, res: Response) => {
+export const generateRecommendations = async (req: Request, res: Response) => {
   /**
-   * TODO: Implement this controller function.
+   * Controller for generating personalized recommendations by calling a mock external service.
    *
    * Steps:
-   * 1. Extract `clientId` and `productInterests` from the request body.
-   * 2. Validate the input data.
-   *    - Ensure `clientId` is a non-empty string.
-   *    - Ensure `productInterests` is a non-empty array of non-empty strings.
-   * 3. Interact with an external API to get tailored promotions.
-   *    - Send a POST request to the external promotions API.
-   *    - Include the `productInterests` in the request payload.
-   * 4. Save the promotions in the database.
-   *    - Use the `PromotionModel` to store data.
-   * 5. Return the promotions in the response.
+   * 1. Extract `user_id` and `preferences` from the request body.
+   * 2. Validate the input data:
+   *    - Ensure `user_id` is a non-empty string.
+   *    - Ensure `preferences` is a non-empty array of strings.
+   * 3. Call the WireMock API at `/llm/generate` to get recommendations based on preferences.
+   * 4. Save the generated recommendations to the database.
+   * 5. Return the recommendations in the response.
    *
-   * Handle exceptions and errors appropriately.
-   *
-   * Hints:
-   * - Use an HTTP client like `axios` or `node-fetch` for external requests.
-   * - Anticipate possible errors from the external service and the database.
-   * - Use try-catch blocks for error handling.
+   * Error handling is done using try-catch.
    */
 
-  // Example (from a different context):
-
-  /*
-  const { clientId, productInterests } = req.body;
+  const WIREMOCK_BASE_URL = process.env.WIREMOCK_URL || 'http://wiremock:8080';
+  const { user_id, preferences } = req.body;
 
   try {
-    // Call the external promotions service
-    const apiResponse = await axios.post('http://external-api.com/promotions', { productInterests });
-    const { promotions } = apiResponse.data;
+    if (
+      !user_id ||
+      !preferences ||
+      !Array.isArray(preferences) ||
+      preferences.length === 0
+    ) {
+      return res
+        .status(400)
+        .json({
+          error: 'Invalid input data: user_id and preferences are required',
+        });
+    }
 
-    // Save to the database
-    const newPromotion = new PromotionModel({ clientId, promotions });
-    await newPromotion.save();
+    const response = await axios.post(`${WIREMOCK_BASE_URL}/llm/generate`, {
+      preferences: preferences,
+    });
 
-    // Send the response
-    res.json({ clientId, promotions });
+    const recommendations = response.data.recommendations;
+
+    const newRecommendation = new RecommendationModel({
+      userRef: user_id,
+      suggestions: recommendations,
+    });
+
+    await newRecommendation.save();
+
+    return res.json({
+      user_id,
+      recommendations: newRecommendation.suggestions,
+    });
   } catch (error) {
-    console.error('Error generating promotions:', error);
-    res.status(500).json({
-      error: 'Unable to generate promotions at this time. Please try again later.',
+    console.error('Error generating recommendations:', error);
+
+    return res.status(500).json({
+      error:
+        'Unable to generate recommendations at this time. Please try again later.',
     });
   }
-  */
 };
